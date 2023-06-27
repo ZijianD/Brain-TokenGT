@@ -27,3 +27,8 @@ resting-state functional connectivity and behavior. NeuroImage 196, 126–
 1. Clone the repository: `git clone https://github.com/ZijianD/Brain-TokenGT.git`
 2. Change to the project directory: `cd Brain-TokenGT`
 3. Install the dependencies: `pip install -r requirements.txt`
+
+
+## Usage
+
+
