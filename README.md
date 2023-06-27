@@ -7,8 +7,8 @@ This is the official repository for "Beyond the Snapshot: Brain Tokenized Graph 
 
 ## Datasets
 
-- ADNI: [Link to Dataset 1](https://adni.loni.usc.edu/)
-- OASIS: [Link to Dataset 2](https://www.oasis-brains.org/)
+- ADNI: https://adni.loni.usc.edu/
+- OASIS: https://www.oasis-brains.org/
 
 We used brain FC metrics derived from ADNI and OASIS-3 resting state fMRI datasets, with preprocessing pipelines following:
 
