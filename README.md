@@ -1,6 +1,5 @@
 # Brain-TokenGT
 This is the official repository for "Beyond the Snapshot: Brain Tokenized Graph Transformer for Longitudinal Brain Functional Connectome Embedding" (MICCAI 2023)
-![Alt Text](model.png)
 
 ## Dependencies
 
@@ -21,3 +20,10 @@ Li, J., Kong, R., Li´egeois, R., Orban, C., Tan, Y., Sun, N., Holmes, A.J., Sab
 M.R., Ge, T., Yeo, B.T.: Global signal regression strengthens association between
 resting-state functional connectivity and behavior. NeuroImage 196, 126–
 141 (2019)
+
+
+## Installation
+
+1. Clone the repository: `git clone https://github.com/ZijianD/Brain-TokenGT.git`
+2. Change to the project directory: `cd Brain-TokenGT`
+3. Install the dependencies: `pip install -r requirements.txt`
