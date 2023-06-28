@@ -1,5 +1,7 @@
 # Brain-TokenGT
 This is the official repository for "Beyond the Snapshot: Brain Tokenized Graph Transformer for Longitudinal Brain Functional Connectome Embedding" (MICCAI 2023)
+[model illustration figure](model.png)
+
 
 ## Dependencies
 
@@ -41,6 +43,13 @@ resting-state functional connectivity and behavior. NeuroImage 196, 126–
 3. Install the dependencies: `pip install -r requirements.txt`
 
 
-## Usage
+## Usage 
 
+``` python
+python main_optuna.py # you may modify config.py to change the hyperparameter setup
+```
 
+## References
+Our implementation uses code from the following repositories:
+- [EvolveGCN](https://github.com/IBM/EvolveGCN.git) 
+- [tokengt](https://github.com/jw9730/tokengt.git)

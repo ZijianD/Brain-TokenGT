@@ -38,7 +38,7 @@ def gaussian_orthogonal_random_matrix(nb_rows, nb_columns, device=None):
     return final_matrix
 
 class mat_GRU_gate(torch.nn.Module):
-    def __init__(self,rows,cols,activation,device = "cpu"):
+    def __init__(self,rows,cols,activation,device = "cuda:0"):
         super().__init__()
         self.activation = activation
         #the k here should be in_feats which is actually the rows
@@ -63,7 +63,7 @@ class mat_GRU_gate(torch.nn.Module):
         return out
 
 class TopK(torch.nn.Module):
-    def __init__(self,feats,k,device = "cpu"):
+    def __init__(self,feats,k,device = "cuda"):
         super().__init__()
         self.scorer = Parameter(torch.Tensor(feats,1)).to(device)
         self.reset_param(self.scorer)
@@ -78,6 +78,8 @@ class TopK(torch.nn.Module):
     def forward(self,node_embs,mask=None):
         if mask is None:
           mask=0
+        node_embs = node_embs.cuda()
+        self.scorer = self.scorer.to(node_embs.device)
         scores = node_embs.matmul(self.scorer) / self.scorer.norm()
         scores = scores + mask
         
@@ -132,7 +134,7 @@ class mat_GRU_cell(torch.nn.Module):
         return new_Q
 
 class GRCU(torch.nn.Module):
-    def __init__(self,args,device = "cpu"):
+    def __init__(self,args,device = "cuda"):
         super().__init__()
         self.args = args
         cell_args = u.Namespace({})
@@ -157,9 +159,9 @@ class GRCU(torch.nn.Module):
         GCN_weights = self.GCN_init_weights
         out_seq = []
         for t,Ahat in enumerate(A_list):
-            node_embs = node_embs_list[t]
-            
-            GCN_weights = self.evolve_weights(GCN_weights,node_embs,mask_list[t]) 
+            node_embs = node_embs_list[t].cuda()
+            Ahat = Ahat.cuda()
+            GCN_weights = self.evolve_weights(GCN_weights,node_embs,mask_list[t]).cuda()
 
             node_embs = self.activation(Ahat.matmul(node_embs.matmul(GCN_weights)))
 

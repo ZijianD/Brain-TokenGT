@@ -32,8 +32,8 @@ def time_alignment(edge_weight=1,max_num_nodes=270,time_steps=3):
 
 def DHT(edge_index, batch, add_loops=False,temporal_edge=None):
     device = edge_index.device
-    
-    temporal_edge = temporal_edge + torch.transpose(temporal_edge,0,1)
+    batch = batch.to(device)
+    temporal_edge = (temporal_edge + torch.transpose(temporal_edge,0,1)).to(device)
 
     static_edge_index = torch.vstack(torch.where(edge_index!=0)).contiguous()
     temporal_edge_index = torch.vstack(torch.where(temporal_edge!=0)).contiguous()
@@ -65,7 +65,7 @@ class EvolveGCNH_Transformer(torch.nn.Module):
     def __init__(self, in_channels,output_sizes, 
                  activation=F.relu,nhead=4,num_layers=2,
                  edge_input_channels=1,num_nodes=90,
-                 total_graph_size=1,static_edge_topk = 180,device = 'cpu'):
+                 total_graph_size=1,static_edge_topk = 180,device = 'cuda'):
       
         super().__init__()
         GRCU_args = u.Namespace({})
@@ -89,26 +89,26 @@ class EvolveGCNH_Transformer(torch.nn.Module):
             
         last_size = output_sizes[-1]
 
-        self.linear = nn.Linear(last_size,last_size) #721
+        self.linear = nn.Linear(last_size,last_size).cuda() #721
         
         encoder_layer = nn.TransformerEncoderLayer(d_model=last_size, nhead=self.nhead)
-        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers).cuda()
         self._parameters.extend(list(self.transformer_encoder.parameters()))
-        self.classifier = nn.Linear(last_size,1)
+        self.classifier = nn.Linear(last_size,1).cuda()
         self._parameters.extend(list(self.classifier.parameters()))
 
-        self.PoolingConvs = pyg_nn.HypergraphConv(edge_input_channels, last_size)
+        self.PoolingConvs = pyg_nn.HypergraphConv(edge_input_channels, last_size).cuda()
         self._parameters.extend(list(self.PoolingConvs.parameters()))
-        self.type_embedding = nn.Embedding(num_embeddings=3,embedding_dim=last_size)
+        self.type_embedding = nn.Embedding(num_embeddings=3,embedding_dim=last_size).cuda()
         self._parameters.extend(list(self.type_embedding.parameters()))
-        self.static_edge_topk = torch_geometric.nn.pool.TopKPooling(in_channels=last_size,ratio=static_edge_topk)
+        self.static_edge_topk = torch_geometric.nn.pool.TopKPooling(in_channels=last_size,ratio=static_edge_topk).cuda()
         self._parameters.extend(list(self.static_edge_topk.parameters()))
 
-        self.projection = nn.Linear(in_channels,256)
+        self.projection = nn.Linear(in_channels,256).cuda()
         self._parameters.extend(list(self.projection.parameters()))
         
-        self.orthogonal_matrix = gaussian_orthogonal_random_matrix(num_nodes,last_size)
-        self.graph_token = nn.Embedding(num_embeddings=total_graph_size,embedding_dim=last_size)
+        self.orthogonal_matrix = gaussian_orthogonal_random_matrix(num_nodes,last_size).cuda()
+        self.graph_token = nn.Embedding(num_embeddings=total_graph_size,embedding_dim=last_size).cuda()
 
 
     def parameters(self):
@@ -121,10 +121,10 @@ class EvolveGCNH_Transformer(torch.nn.Module):
 
         node_embedding = torch.vstack(Nodes_list)
         
-        adjs = torch.block_diag(*A_list) 
+        adjs = torch.block_diag(*A_list).cuda()
         
-        adjs_90 = torch.tensor(np.eye(270,270,90),dtype=torch.float32)
-        adjs_m90 = torch.tensor(np.eye(270,270,-90),dtype=torch.float32)
+        adjs_90 = torch.tensor(np.eye(270,270,90),dtype=torch.float32).cuda()
+        adjs_m90 = torch.tensor(np.eye(270,270,-90),dtype=torch.float32).cuda()
         adjs_all = adjs+adjs_90+adjs_m90 
         adjs_all = adjs_all.float()
        
@@ -132,12 +132,15 @@ class EvolveGCNH_Transformer(torch.nn.Module):
           row,col= torch.where(adjs_all!=0)
           edge_attr = adjs_all[row,col]
 
-        batch = torch.zeros(adjs.shape[0]) 
+        batch = torch.zeros(adjs.shape[0]).cuda()
 
         hyperedge_index, edge_batch,temporal_edge_num = DHT(adjs, batch,temporal_edge=self.temporal_edge)
         hyperedge_index = hyperedge_index.to(self.device)
-        
-        edge_embedding = F.mish(self.PoolingConvs(edge_attr.view(-1,1).to(self.device), hyperedge_index))
+        edge_attr = edge_attr.to(self.device)
+
+        device_of_first_param = next(self.PoolingConvs.parameters()).device
+        # print(device_of_first_param, edge_attr.device, hyperedge_index.device)
+        edge_embedding = F.mish(self.PoolingConvs(edge_attr.view(-1,1), hyperedge_index))
         
         static_edge_embedding = edge_embedding[0:edge_embedding.shape[0]-temporal_edge_num]
 
@@ -158,7 +161,7 @@ class EvolveGCNH_Transformer(torch.nn.Module):
           static_edge_embeddings = static_edge_embedding
           temporal_edge_embeddings = temporal_edge_embedding
 
-        graph_embedding = self.graph_token(torch.tensor(graph_id))
+        graph_embedding = self.graph_token(torch.tensor(graph_id).cuda())
 
         if use_node_identifier:
           
@@ -183,7 +186,7 @@ class TokenGT(torch.nn.Module):
     def __init__(self, in_channels,output_sizes, 
                  activation=F.relu,nhead=4,num_layers=2,
                  edge_input_channels=1,num_nodes=90,
-                 total_graph_size=1,static_edge_topk = 180,device = 'cpu'): # skipfeats=False
+                 total_graph_size=1,static_edge_topk = 180,device = 'cuda'): # skipfeats=False
       
         super().__init__()
         GRCU_args = u.Namespace({})
@@ -211,7 +214,7 @@ class TokenGT(torch.nn.Module):
 
         last_size = output_sizes[-1]
 
-        self.linear = nn.Linear(last_size,last_size)
+        self.linear = nn.Linear(last_size,last_size).cuda()
         
         encoder_layer = nn.TransformerEncoderLayer(d_model=last_size, nhead=self.nhead)
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)

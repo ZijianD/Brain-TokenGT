@@ -24,8 +24,6 @@ def objective(trial: optuna.trial.Trial) -> float:
 
     keys = np.array(list(datasets.keys()))
     labels = np.array([label[k] for k in keys])
-    keys = np.array(list(range(100)))
-    labels = np.random.choice([0, 1], size=100)
 
     depth = trial.suggest_int('depth',opt.K[0],opt.K[-1]) 
 
@@ -59,7 +57,7 @@ def objective(trial: optuna.trial.Trial) -> float:
 
     best_aucs = []
     # for i,(train_index,val_test_index) in enumerate(skf.split(keys,labels)):
-    train_index=[0,1]; val_index = [2]
+    val_index=list(range(9)); train_index = [9]
     best_auc = 0
     train_g_list = [datasets[k] for k in keys[train_index].tolist()]
     train_g_labels = labels[train_index]
