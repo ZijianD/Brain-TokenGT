@@ -3,6 +3,18 @@ This is the official repository for "Beyond the Snapshot: Brain Tokenized Graph 
 
 ## Dependencies
 
+The framework needs the following dependencies:
+
+```
+numpy==1.24.2
+optuna==3.1.0
+PyYAML==6.0
+scikit_learn==1.2.2
+scipy==1.9.1
+torch==2.0.0
+torch_geometric==2.2.0
+tqdm==4.64.1
+```
 
 ## Datasets
 
