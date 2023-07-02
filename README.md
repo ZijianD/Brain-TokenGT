@@ -49,7 +49,23 @@ resting-state functional connectivity and behavior. NeuroImage 196, 126–
 python main_optuna.py # you may modify config.py to change the hyperparameter setup
 ```
 
-## References
+## Acknowledgement
 Our implementation uses code from the following repositories:
 - [EvolveGCN](https://github.com/IBM/EvolveGCN.git) 
 - [tokengt](https://github.com/jw9730/tokengt.git)
+
+This work was supported by National Medical Research Council, Singapore (NMRC/OFLCG19May-0035 to J-H Zhou) and Yong Loo Lin School of Medicine Research Core Funding (to J-H Zhou), National University of Singapore, Singapore. Yueming Jin was supported by MoE Tier 1 Start up grant (WBS: A8001267-00-00).
+
+## Citation
+Please cite our paper if you find this code useful for your work:
+``` 
+@inproceedings{
+  dong2023braintokengt,
+  title={Beyond the Snapshot: Brain Tokenized Graph Transformer for Longitudinal Brain Functional Connectome Embedding},
+  author={Zijian Dong and Yilei Wu and Yu Xiao and Joanna Su Xian Chong and Yueming Jin and Juan Helen Zhou},
+  booktitle={International Conference on Medical Image Computing and Computer-Assisted Intervention},
+  pages={},
+  year={2023},
+  organization={Springer}
+}
+```
